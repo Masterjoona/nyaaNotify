@@ -4,6 +4,7 @@ A simple Go program that checks for new torrents on [nyaa](https://nyaa.si) usin
 
 ## Usage
 1. Clone the repository and build the binary
+
 `git clone https://github.com/Masterjoona/nyaaNotify`
 `cd nyaaNotify && go build`
 2. `./nyaaNotify -generate` and read the comments.
@@ -20,6 +21,7 @@ A simple Go program that checks for new torrents on [nyaa](https://nyaa.si) usin
 - `-amount` how many torrents will be sent to discord.
 > [!NOTE]  
 > Either `-include` or `-regex` must be set. If both are set, regex will be checked first.
+
 > [!TIP]
 > `-include` is often sufficient without the need for regex. For instance: `-include="jujutsu,kaisen,1080,sub`. However, keep in mind that this might match multiple torrents on release day. To control the quantity, you can use `-amount.`"
 ### Optional flags
@@ -33,6 +35,7 @@ A simple Go program that checks for new torrents on [nyaa](https://nyaa.si) usin
 ## Screenshots
 ![screenshot](https://bin.masterjoona.dev/u/DaNTbR.png)
 ![screenshot](https://bin.masterjoona.dev/u/L7Zw6K.png)
+
 *What `./nyaaNotify -generate` looks like*
 
 ## Notes

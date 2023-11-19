@@ -5,8 +5,11 @@ A simple Go program that checks for new torrents on [nyaa](https://nyaa.si) usin
 ## Usage
 1. Clone the repository and build the binary
 
-`git clone https://github.com/Masterjoona/nyaaNotify`
-`cd nyaaNotify && go build`
+```sh
+git clone https://github.com/Masterjoona/nyaaNotify
+cd nyaaNotify && go build
+```
+
 2. `./nyaaNotify -generate` and read the comments.
 3. Copy the printed line to your crontab.
 

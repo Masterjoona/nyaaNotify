@@ -42,6 +42,7 @@ func SendEmbed(post NyaaPost, description string, discordWebhook string) {
 	}
 	err := discordwebhook.SendMessage(discordWebhook, message)
 	if err != nil {
+		Logger("Error sending message: " + err.Error())
 		panic(err)
 	}
 }

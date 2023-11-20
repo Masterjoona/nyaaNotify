@@ -24,11 +24,9 @@ func main() {
 		MakeParameters()
 		return
 	}
-	if ShouldntPost() {
-		//println("Not posting.")
+	if SchrödingerDate() {
 		return
 	}
-	CleanPosted()
 	matches, nyaaPosts := MatchPosts()
 	for i, match := range matches {
 		if match[5] == "" {
@@ -51,17 +49,21 @@ func main() {
 	}
 	for _, post := range nyaaPosts {
 		if CheckTitle(post.Title, includeString, regexString) {
-			if CheckIfAlreadyPosted(post) {
-				continue
-			}
-			description := MakeDescription(post, shortenerToken, shortenerURL)
 			if IsOverAmount(amount) {
-				//println("Over amount.")
 				StorePosted(GetDate())
 				return
 			}
+			if AlreadyPosted(post) {
+				continue
+			}
+
+			description := MakeDescription(post, shortenerToken, shortenerURL)
 			SendEmbed(post, description, discordWebhook)
 			StorePosted(post.URL)
+
+			if IsOverAmount(amount) {
+				StorePosted(GetDate())
+			}
 		}
 	}
 }

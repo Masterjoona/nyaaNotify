@@ -3,10 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"os"
-	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -15,6 +12,7 @@ func CheckTitle(title string, includeString string, regex string) bool {
 	if regex != "" {
 		match, err := regexp.MatchString(regex, title)
 		if err != nil {
+			Logger("Error matching regex: " + err.Error())
 			panic(err)
 		}
 		return match
@@ -37,73 +35,19 @@ func CheckTitle(title string, includeString string, regex string) bool {
 }
 
 func MakeDescription(post NyaaPost, shortenerToken string, shortenerURL string) string {
-	magnetOrTorrent := ""
-	if shortenerToken == "" {
-		magnetOrTorrent = "[Torrent](" + post.Torrent + ")"
-	} else {
-		shortURL, err := ShortenURL(post.Magnet, shortenerToken, shortenerURL)
-		if err != nil {
-			Logger("Error shortening url: " + err.Error())
-			return "[Torrent](" + post.Torrent + ") | Error shortening url."
-		}
-		magnetOrTorrent = "[Magnet](" + shortURL + ")"
+	if shortenerToken == "" || shortenerURL == "" {
+		torrent := "[Torrent](" + post.Torrent + ")"
+		return fmt.Sprintf("Size: %s | %s | <t:%s:R>", post.Size, torrent, post.Date)
 	}
-	return fmt.Sprintf("Size: %s | %s | <t:%s:R>", post.Size, magnetOrTorrent, post.Date)
-
-}
-
-func CheckIfAlreadyPosted(post NyaaPost) bool {
-	f, err := os.ReadFile(executablePath + "/" + name + "_posted.txt")
+	shortURL, err := ShortenURL(post.Magnet, shortenerToken, shortenerURL)
 	if err != nil {
-		return false
+		Logger("Error shortening url: " + err.Error())
+		return "[Torrent](" + post.Torrent + ") | Error shortening url."
 	}
+	magnet := "[Magnet](" + shortURL + ")"
 
-	if bytes.Contains(f, []byte(post.URL)) {
-		Logger("Already posted: " + post.Title)
-		return true
-	}
-	return false
-}
+	return fmt.Sprintf("Size: %s | %s | <t:%s:R>", post.Size, magnet, post.Date)
 
-func StorePosted(url string) {
-	f, err := os.OpenFile(executablePath+"/"+name+"_posted.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	_, err = f.WriteString(url + "\n")
-	if err != nil {
-		panic(err)
-	}
-
-}
-
-func IsOverAmount(amount string) bool {
-	f, err := os.ReadFile(executablePath + "/" + name + "_posted.txt")
-	if err != nil {
-		return false
-	}
-	lines := strings.Split(string(f), "\n")
-	amountInt, err := strconv.Atoi(amount)
-	if err != nil {
-		panic(err)
-	}
-
-	return len(lines)-1 >= amountInt
-}
-
-func Logger(message string) {
-	f, err := os.OpenFile(executablePath+"/"+name+"_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	logMessage := "[" + time.Now().Format("2006-01-02 15:04:05") + "] " + message
-	println(logMessage)
-	_, err = f.WriteString(logMessage + "\n")
-	if err != nil {
-		panic(err)
-	}
 }
 
 func OptionalParam(flag, value string) string {
@@ -113,35 +57,19 @@ func OptionalParam(flag, value string) string {
 	return ""
 }
 
-func ShouldntPost() bool {
-	f, err := os.ReadFile(executablePath + "/" + name + "_posted.txt")
-	if err != nil {
-		return false
-	}
-	lines := strings.Split(string(f), "\n")
-	lastLine := lines[len(lines)-2]
-	lastLineDate := time.Now().Format("2006-01-02")
-	return lastLine == lastLineDate
-}
-
-func CleanPosted() {
-	f, err := os.OpenFile(executablePath+"/"+name+"_posted.txt", os.O_TRUNC, 0644)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-}
-
 func GetDate() string {
 	return time.Now().Format("2006-01-02")
 }
 
-func getExecutablePath() string {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
+func CountOccurrences(source, target []byte) int {
+	count := 0
+	for i := 0; i < len(source); {
+		index := bytes.Index(source[i:], target)
+		if index == -1 {
+			break
+		}
+		count++
+		i += index + len(target)
 	}
-	return filepath.Dir(ex)
+	return count
 }
-
-var executablePath = getExecutablePath()

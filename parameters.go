@@ -30,6 +30,12 @@ func ParseCommandParameters() (bool, string, string, string, string, string, str
 	flag.StringVar(&amount, "amount", "", "stop posting after x links have been posted.")
 	flag.StringVar(&name, "name", "", "name for logging and posted.txt")
 	flag.Parse()
+
+	var executablePathLocal = getExecutablePath()
+	postedFile = executablePathLocal + "/" + name + "_posted.txt"
+	logFile = executablePathLocal + "/" + name + "_log.txt"
+	executablePath = executablePathLocal
+
 	return generateCron, discordWebhook, shortenerToken, includeString, regexString, shortenerURL, amount
 }
 
@@ -73,6 +79,7 @@ func MakeParameters() {
 	editor := editor.New([]byte(defaultText), "parameters.sh")
 	output, err := editor.Run()
 	if err != nil {
+		Logger("Error running editor: " + err.Error())
 		panic(err)
 	}
 
@@ -88,6 +95,7 @@ func MakeParameters() {
 			Logger("shortener=" + shortenerURL)
 			Logger("token=" + shortenerToken)
 		}
+		Logger("Invalid parameters")
 		panic("Invalid parameters")
 	}
 

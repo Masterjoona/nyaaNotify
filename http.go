@@ -14,6 +14,7 @@ type ShortenedURL struct {
 func FetchNyaa(url string) string {
 	resp, err := http.Get(url)
 	if err != nil {
+		Logger("Error fetching nyaa: " + err.Error())
 		panic(err)
 	}
 
@@ -21,6 +22,7 @@ func FetchNyaa(url string) string {
 	content, err := io.ReadAll(resp.Body)
 
 	if err != nil {
+		Logger("Error reading nyaa response: " + err.Error())
 		panic(err)
 	}
 	return string(content)

@@ -61,7 +61,7 @@ func StorePosted(url string) {
 
 }
 
-func SchrödingerDate() bool {
+func CheckDate() bool {
 	f, err := os.ReadFile(postedFile)
 	if err != nil {
 		return false

@@ -5,11 +5,14 @@ import "github.com/gtuk/discordwebhook"
 func SendEmbed(post NyaaPost, description string, discordWebhook string) {
 	seeds := "Seeders"
 	leechs := "Leechers"
-	cate := "Category"
+	completed := "Completed"
+
+	category := "Category"
 	trueBool := true
-	fields := &[]discordwebhook.Field{
+
+	fields := []discordwebhook.Field{
 		{
-			Name:   &cate,
+			Name:   &category,
 			Value:  &post.Category,
 			Inline: &trueBool,
 		},
@@ -23,6 +26,11 @@ func SendEmbed(post NyaaPost, description string, discordWebhook string) {
 			Value:  &post.Leech,
 			Inline: &trueBool,
 		},
+		{
+			Name:   &completed,
+			Value:  &post.Completed,
+			Inline: &trueBool,
+		},
 	}
 	thumb := discordwebhook.Thumbnail{
 		Url: &post.CategoryImg,
@@ -31,15 +39,18 @@ func SendEmbed(post NyaaPost, description string, discordWebhook string) {
 		Title:       &post.Title,
 		Url:         &post.URL,
 		Description: &description,
-		Fields:      fields,
+		Fields:      &fields,
 		Thumbnail:   &thumb,
 	}
+
 	username := "Nyaa.si Notification"
-	embeds := &[]discordwebhook.Embed{embed}
+	embeds := []discordwebhook.Embed{embed}
+
 	message := discordwebhook.Message{
 		Username: &username,
-		Embeds:   embeds,
+		Embeds:   &embeds,
 	}
+
 	err := discordwebhook.SendMessage(discordWebhook, message)
 	if err != nil {
 		Logger("Error sending message: " + err.Error())

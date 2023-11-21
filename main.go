@@ -24,7 +24,7 @@ func main() {
 		MakeParameters()
 		return
 	}
-	if SchrödingerDate() {
+	if CheckDate() {
 		return
 	}
 	matches, nyaaPosts := MatchPosts()
@@ -50,6 +50,7 @@ func main() {
 	for _, post := range nyaaPosts {
 		if CheckTitle(post.Title, includeString, regexString) {
 			if IsOverAmount(amount) {
+				CleanPosted()
 				StorePosted(GetDate())
 				return
 			}
@@ -59,11 +60,14 @@ func main() {
 
 			description := MakeDescription(post, shortenerToken, shortenerURL)
 			SendEmbed(post, description, discordWebhook)
+
 			StorePosted(post.URL)
 
 			if IsOverAmount(amount) {
+				CleanPosted()
 				StorePosted(GetDate())
 			}
+			// This might be really cursed and I'm don't even know if it works. I tried testing it but you never know.
 		}
 	}
 }

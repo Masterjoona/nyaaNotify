@@ -35,9 +35,13 @@ func CheckTitle(title string, includeString string, regex string) bool {
 }
 
 func MakeDescription(post NyaaPost, shortenerToken string, shortenerURL string) string {
+	comments := ""
+	if post.Comments != "0" {
+		comments = post.Comments + " comments"
+	}
 	if shortenerToken == "" || shortenerURL == "" {
 		torrent := "[Torrent](" + post.Torrent + ")"
-		return fmt.Sprintf("Size: %s | %s | <t:%s:R>", post.Size, torrent, post.Date)
+		return fmt.Sprintf("Size: %s | %s | <t:%s:R> | %s", post.Size, torrent, post.Date, comments)
 	}
 	shortURL, err := ShortenURL(post.Magnet, shortenerToken, shortenerURL)
 	if err != nil {
@@ -46,7 +50,7 @@ func MakeDescription(post NyaaPost, shortenerToken string, shortenerURL string) 
 	}
 	magnet := "[Magnet](" + shortURL + ")"
 
-	return fmt.Sprintf("Size: %s | %s | <t:%s:R>", post.Size, magnet, post.Date)
+	return fmt.Sprintf("Size: %s | %s | <t:%s:R> | %s", post.Size, magnet, post.Date, comments)
 
 }
 

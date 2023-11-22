@@ -9,34 +9,28 @@ import (
 	"github.com/halkyon/go-editor-capture-input/pkg/editor"
 )
 
-var name string
+var Name string
+var ShortenerToken string
+var ShortenerURL string
 
-func ParseCommandParameters() (bool, string, string, string, string, string, string) {
-	var generateCron bool
-	var discordWebhook string
-	var includeString string
-	var regexString string
-	var amount string
-
-	var shortenerToken string
-	var shortenerURL string
+func ParseCommandParameters() (generateCron bool, discordWebhook, includeString, regexString, amount string) {
 
 	flag.BoolVar(&generateCron, "generate", false, "generate a cron expression")
 	flag.StringVar(&discordWebhook, "webhook", "", "discord webhook url")
-	flag.StringVar(&shortenerToken, "token", "", "see readme")
-	flag.StringVar(&shortenerURL, "shortener", "", "see readme")
+	flag.StringVar(&ShortenerToken, "token", "", "see readme")
+	flag.StringVar(&ShortenerURL, "shortener", "", "see readme")
 	flag.StringVar(&includeString, "include", "", "strings to look for")
 	flag.StringVar(&regexString, "regex", "", "regex to match.")
 	flag.StringVar(&amount, "amount", "", "stop posting after x links have been posted.")
-	flag.StringVar(&name, "name", "", "name for logging and posted.txt")
+	flag.StringVar(&Name, "name", "", "name for logging and posted.txt")
 	flag.Parse()
 
 	var executablePathLocal = getExecutablePath()
-	postedFile = executablePathLocal + "/" + name + "_posted.txt"
-	logFile = executablePathLocal + "/" + name + "_log.txt"
+	postedFile = executablePathLocal + "/" + Name + "_posted.json"
+	logFile = executablePathLocal + "/" + Name + "_log.txt"
 	executablePath = executablePathLocal
 
-	return generateCron, discordWebhook, shortenerToken, includeString, regexString, shortenerURL, amount
+	return generateCron, discordWebhook, includeString, regexString, amount
 }
 
 func parseParameters(parameters string) (cron, include, regex, webhook, nameName, apiUrl, token, amount string) {
@@ -60,7 +54,7 @@ func parseParameters(parameters string) (cron, include, regex, webhook, nameName
 			}
 		}
 	}
-	name = nameName
+	Name = nameName
 	return
 }
 

@@ -18,7 +18,7 @@ cd nyaaNotify && go build
 - `-generate` opens your `$EDITOR` and lets you set parameters
 ### Required flags
 - `-webhook` webhook url
-- `-name` Name for logging and posted.txt
+- `-name` Name for logging and posted files
 - `-include` words that the title must include. `,` separate with commas and words starting with `;` are excluded (Intuitive, right?)
 - `-regex` lets you set a regex that the title must match. Golang flavor.
 - `-amount` how many torrents will be sent to discord.
@@ -26,10 +26,11 @@ cd nyaaNotify && go build
 > Either `-include` or `-regex` must be set. If both are set, regex will be checked first.
 
 > [!TIP]
-> `-include` is often sufficient without the need for regex. For instance: `-include="jujutsu,kaisen,1080,sub`. However, keep in mind that this might match multiple torrents on release day. To control the quantity, you can use `-amount.`"
+> `-include` is often sufficient without the need for regex. For instance: `-include="jujutsu,kaisen,1080,sub`. However, keep in mind that this might match multiple torrents on release day, so to control the amount of torrents to be sent, you can use `-amount.`"
 ### Optional flags
 - `-shortener` input a url shortener. Because `[Magnet](magnet:?xt=urn:btih:...)` won't get markdowned in discord.
 - `-token` the token for the url shortener
+If these are not set, it will link the .torrent file directly.
 
 ## Modules
 - [go-editor-capture-input](https://github.com/halkyon/go-editor-capture-input)

@@ -18,15 +18,25 @@ type NyaaPost struct {
 var url = "https://nyaa.si"
 
 func main() {
-	generateCron, discordWebhook, shortenerToken, includeString, regexString, shortenerURL, amount := ParseCommandParameters()
+	generateCron, discordWebhook, includeString, regexString, amount := ParseCommandParameters()
 
 	if generateCron {
 		MakeParameters()
 		return
 	}
-	if CheckDate() {
+
+	if GetCleanDate() == GetDate() {
+		Logger("Seems like a week has passed, cleaning JSON and log file.")
+		CleanPosted()
+		CleanLogFile()
+	}
+
+	if IsAmount(amount) {
+		Logger("Posted already enough today.")
+		SetCleanDateInJSON()
 		return
 	}
+
 	matches, nyaaPosts := MatchPosts()
 	for i, match := range matches {
 		if match[5] == "" {
@@ -47,27 +57,23 @@ func main() {
 			CategoryImg: url + match[2],
 		}
 	}
+
 	for _, post := range nyaaPosts {
-		if CheckTitle(post.Title, includeString, regexString) {
-			if IsOverAmount(amount) {
-				CleanPosted()
-				StorePosted(GetDate())
-				return
-			}
+		if MatchTitle(post.Title, includeString, regexString) {
+			Logger("Found match: " + post.Title)
+
 			if AlreadyPosted(post) {
+				Logger("Already posted: " + post.Title)
 				continue
 			}
-
-			description := MakeDescription(post, shortenerToken, shortenerURL)
-			SendEmbed(post, description, discordWebhook)
-
-			StorePosted(post.URL)
-
-			if IsOverAmount(amount) {
-				CleanPosted()
-				StorePosted(GetDate())
+			if IsAmount(amount) {
+				Logger("Posted already enough today.")
+				SetCleanDateInJSON()
+				return
 			}
-			// This might be really cursed and I'm don't even know if it works. I tried testing it but you never know.
+
+			SendEmbed(post, discordWebhook)
+			StoreInJSON(post)
 		}
 	}
 }

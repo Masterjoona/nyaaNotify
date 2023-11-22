@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"regexp"
 	"strings"
 	"time"
 )
 
-func CheckTitle(title string, includeString string, regex string) bool {
+func MatchTitle(title string, includeString string, regex string) bool {
 	if regex != "" {
 		match, err := regexp.MatchString(regex, title)
 		if err != nil {
@@ -34,26 +32,6 @@ func CheckTitle(title string, includeString string, regex string) bool {
 	return true
 }
 
-func MakeDescription(post NyaaPost, shortenerToken string, shortenerURL string) string {
-	comments := ""
-	if post.Comments != "0" {
-		comments = post.Comments + " comments"
-	}
-	if shortenerToken == "" || shortenerURL == "" {
-		torrent := "[Torrent](" + post.Torrent + ")"
-		return fmt.Sprintf("Size: %s | %s | <t:%s:R> | %s", post.Size, torrent, post.Date, comments)
-	}
-	shortURL, err := ShortenURL(post.Magnet, shortenerToken, shortenerURL)
-	if err != nil {
-		Logger("Error shortening url: " + err.Error())
-		return "[Torrent](" + post.Torrent + ") | Error shortening url."
-	}
-	magnet := "[Magnet](" + shortURL + ")"
-
-	return fmt.Sprintf("Size: %s | %s | <t:%s:R> | %s", post.Size, magnet, post.Date, comments)
-
-}
-
 func OptionalParam(flag, value string) string {
 	if value != "" {
 		return " " + flag + "='" + value + "'"
@@ -65,15 +43,6 @@ func GetDate() string {
 	return time.Now().Format("2006-01-02")
 }
 
-func CountOccurrences(source, target []byte) int {
-	count := 0
-	for i := 0; i < len(source); {
-		index := bytes.Index(source[i:], target)
-		if index == -1 {
-			break
-		}
-		count++
-		i += index + len(target)
-	}
-	return count
+func GetCleanDateString() string {
+	return time.Now().AddDate(0, 0, 7).Format("2006-01-02")
 }

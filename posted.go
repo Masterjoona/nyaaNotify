@@ -4,50 +4,23 @@ import (
 	"encoding/json"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type postedJSON struct {
 	PostedURLs []string `json:"postedURLs"`
+	LastMod    string   `json:"lastMod"`
 	CleanDate  string   `json:"cleanDate"`
 }
 
-func StoreInJSON(post NyaaPost) {
-	existingData, err := os.ReadFile(postedFile)
-	if err != nil {
-		Logger("Error reading file: " + err.Error())
-	}
-	jsonData := postedJSON{}
-	if err := json.Unmarshal(existingData, &jsonData); err != nil && len(existingData) > 0 {
-		Logger("Error unmarshalling JSON: " + err.Error())
-	}
-
-	jsonData.PostedURLs = append(jsonData.PostedURLs, post.URL)
-
-	updatedData, err := json.MarshalIndent(jsonData, "", "    ")
-	if err != nil {
-		Logger("Error marshalling JSON: " + err.Error())
-	}
-
-	err = os.WriteFile(postedFile, updatedData, 0644)
-	if err != nil {
-		Logger("Error writing file: " + err.Error())
-	}
-
-}
-
-func AlreadyPosted(post NyaaPost) bool {
-	f, err := os.Open(postedFile)
-	if err != nil {
+func AlreadyPosted(checkURL string) bool {
+	postedURLsString := GetField("PostedURLs")
+	if postedURLsString == "" {
 		return false
 	}
-	defer f.Close()
-	postedJSON := postedJSON{}
-	err = json.NewDecoder(f).Decode(&postedJSON)
-	if err != nil {
-		return false
-	}
-	for _, url := range postedJSON.PostedURLs {
-		if url == post.URL {
+	postedURLs := strings.Split(postedURLsString, ",")
+	for _, url := range postedURLs {
+		if url == checkURL {
 			return true
 		}
 	}
@@ -55,38 +28,78 @@ func AlreadyPosted(post NyaaPost) bool {
 }
 
 func IsAmount(amount string) bool {
-	f, err := os.Open(postedFile)
-	if err != nil {
+	postedURLsString := GetField("PostedURLs")
+	if postedURLsString == "" {
 		return false
 	}
-	defer f.Close()
-	postedJSON := postedJSON{}
-	err = json.NewDecoder(f).Decode(&postedJSON)
-	if err != nil {
-		return false
-	}
+	postedURLs := strings.Split(postedURLsString, ",")
 	amountInt, err := strconv.Atoi(amount)
 	if err != nil {
 		Logger("Error converting amount to int: " + err.Error())
 		panic(err)
 	}
 
-	return len(postedJSON.PostedURLs) >= amountInt
+	return len(postedURLs) >= amountInt
 }
 
-func SetCleanDateInJSON() {
+func GetField(field string) string {
 	f, err := os.Open(postedFile)
 	if err != nil {
-		return
+		return ""
 	}
 	defer f.Close()
+
 	postedJSON := postedJSON{}
 	err = json.NewDecoder(f).Decode(&postedJSON)
 	if err != nil {
+		return ""
+	}
+
+	switch field {
+	case "CleanDate":
+		return postedJSON.CleanDate
+	case "LastMod":
+		return postedJSON.LastMod
+	case "PostedURLs":
+		return strings.Join(postedJSON.PostedURLs, ",")
+	default:
+		return ""
+	}
+}
+
+func SetField(field string, value string) {
+	f, err := os.Open(postedFile)
+	if err != nil {
+		Logger("Error opening file: " + err.Error())
+		f, err = os.Create(postedFile)
+		if err != nil {
+			Logger("Error creating file: " + err.Error())
+			panic(err)
+		}
+	}
+	defer f.Close()
+
+	postedJSONUpdate := postedJSON{}
+	err = json.NewDecoder(f).Decode(&postedJSONUpdate)
+	if err != nil {
+		postedJSONUpdate = postedJSON{
+			PostedURLs: []string{},
+			LastMod:    "",
+			CleanDate:  "",
+		}
+	}
+	switch field {
+	case "CleanDate":
+		postedJSONUpdate.CleanDate = value
+	case "LastMod":
+		postedJSONUpdate.LastMod = value
+	case "PostedURLs":
+		postedJSONUpdate.PostedURLs = append(postedJSONUpdate.PostedURLs, value)
+	default:
 		return
 	}
-	postedJSON.CleanDate = GetCleanDateString()
-	updatedData, err := json.MarshalIndent(postedJSON, "", "    ")
+
+	updatedData, err := json.MarshalIndent(postedJSONUpdate, "", "    ")
 	if err != nil {
 		Logger("Error marshalling JSON: " + err.Error())
 	}
@@ -94,18 +107,4 @@ func SetCleanDateInJSON() {
 	if err != nil {
 		Logger("Error writing file: " + err.Error())
 	}
-}
-
-func GetCleanDate() string {
-	f, err := os.Open(postedFile)
-	if err != nil {
-		return ""
-	}
-	defer f.Close()
-	postedJSON := postedJSON{}
-	err = json.NewDecoder(f).Decode(&postedJSON)
-	if err != nil {
-		return ""
-	}
-	return postedJSON.CleanDate
 }

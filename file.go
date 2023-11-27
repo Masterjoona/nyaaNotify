@@ -20,20 +20,15 @@ func getExecutablePath() string {
 	return filepath.Dir(ex)
 }
 
-func CleanLogFile() {
-	f, err := os.OpenFile(logFile, os.O_TRUNC, 0644)
+func CleanFiles() {
+	err := os.Remove(postedFile)
 	if err != nil {
-		return
+		Logger("No file to clean.")
 	}
-	defer f.Close()
-}
-
-func CleanPosted() {
-	f, err := os.OpenFile(postedFile, os.O_TRUNC, 0644)
+	err = os.Remove(logFile)
 	if err != nil {
-		return
+		Logger("No file to clean.")
 	}
-	defer f.Close()
 }
 
 func Logger(message string) {

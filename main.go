@@ -24,16 +24,16 @@ func main() {
 		MakeParameters()
 		return
 	}
-
-	if GetCleanDate() == GetDate() {
+	today := GetDate()
+	if GetField("CleanDate") == today || (GetField("LastMod") != today && GetField("LastMod") != "") {
 		Logger("Seems like a week has passed, cleaning JSON and log file.")
-		CleanPosted()
-		CleanLogFile()
+		CleanFiles()
 	}
 
 	if IsAmount(amount) {
 		Logger("Posted already enough today.")
-		SetCleanDateInJSON()
+		SetField("LastMod", today)
+		SetField("CleanDate", GetCleanDateString())
 		return
 	}
 
@@ -59,21 +59,23 @@ func main() {
 	}
 
 	for _, post := range nyaaPosts {
-		if MatchTitle(post.Title, includeString, regexString) {
-			Logger("Found match: " + post.Title)
-
-			if AlreadyPosted(post) {
-				Logger("Already posted: " + post.Title)
+		title := post.Title
+		if MatchTitle(title, includeString, regexString) {
+			Logger("Found match: " + title)
+			url := post.URL
+			if AlreadyPosted(url) {
+				Logger("Already posted: " + title)
 				continue
 			}
 			if IsAmount(amount) {
 				Logger("Posted already enough today.")
-				SetCleanDateInJSON()
+				SetField("LastMod", today)
 				return
 			}
-
-			SendEmbed(post, discordWebhook)
-			StoreInJSON(post)
+			if false {
+				SendEmbed(post, discordWebhook)
+			}
+			SetField("PostedURLs", url)
 		}
 	}
 }

@@ -72,9 +72,7 @@ func main() {
 				SetField("LastMod", today)
 				return
 			}
-			if false {
-				SendEmbed(post, discordWebhook)
-			}
+			SendEmbed(post, discordWebhook)
 			SetField("PostedURLs", url)
 		}
 	}

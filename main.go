@@ -36,42 +36,31 @@ func main() {
 		return
 	}
 
-	matches, nyaaPosts := MatchPosts()
-	for i, match := range matches {
-		if match[5] == "" {
-			match[5] = "0"
+	allMatches, nyaaPosts := MatchPosts()
+	for i, matches := range allMatches {
+		if matches[5] == "" {
+			matches[5] = "0" // comments
 		}
-		nyaaPosts[i] = NyaaPost{
-			Category:    match[1],
-			URL:         Url + match[3],
-			Title:       match[4],
-			Torrent:     Url + match[8],
-			Magnet:      match[9],
-			Size:        match[10],
-			Date:        match[11],
-			Seed:        match[12],
-			Leech:       match[13],
-			Completed:   match[14],
-			Comments:    match[5],
-			CategoryImg: Url + match[2],
-		}
-	}
 
-	for _, post := range nyaaPosts {
-		title := post.Title
+		nyaaPosts[i] = CreateNyaaPost(matches)
+		title := nyaaPosts[i].Title
+
 		if MatchTitle(title, includeString, regexString) {
 			Logger("Found match: " + title)
-			postURL := post.URL
+			postURL := nyaaPosts[i].URL
+
 			if AlreadyPosted(postURL) {
 				Logger("Already posted: " + title)
 				continue
 			}
+
 			if IsAmount(amount) {
 				Logger("Posted already enough today.")
 				SetField("LastMod", today)
 				return
 			}
-			SendEmbed(post, discordWebhook)
+
+			SendEmbed(nyaaPosts[i], discordWebhook)
 			SetField("PostedURLs", postURL)
 		}
 	}

@@ -42,3 +42,20 @@ func OptionalParam(flag, value string) string {
 func GetDate() string {
 	return time.Now().Format("2006-01-02")
 }
+
+func CreateNyaaPost(matches []string) NyaaPost {
+	nyaaPost := NyaaPost{}
+	nyaaPost.Category = matches[1]
+	nyaaPost.CategoryImg = Url + matches[2]
+	nyaaPost.URL = Url + matches[3]
+	nyaaPost.Title = matches[4]
+	nyaaPost.Comments = matches[5]
+	nyaaPost.Torrent = Url + matches[8]
+	nyaaPost.Magnet = matches[9]
+	nyaaPost.Size = matches[10]
+	nyaaPost.Date = matches[11]
+	nyaaPost.Seed = matches[12]
+	nyaaPost.Leech = matches[13]
+	nyaaPost.Completed = matches[14]
+	return nyaaPost
+}

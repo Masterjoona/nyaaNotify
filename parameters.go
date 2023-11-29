@@ -26,9 +26,9 @@ func ParseCommandParameters() (generateCron bool, discordWebhook, includeString,
 	flag.Parse()
 
 	var executablePathLocal = getExecutablePath()
-	postedFile = executablePathLocal + "/" + Name + "_posted.json"
-	logFile = executablePathLocal + "/" + Name + "_log.txt"
-	executablePath = executablePathLocal
+	PostedFile = executablePathLocal + "/" + Name + "_posted.json"
+	LogFile = executablePathLocal + "/" + Name + "_log.txt"
+	ExecutablePath = executablePathLocal
 
 	return generateCron, discordWebhook, includeString, regexString, amount
 }
@@ -96,6 +96,6 @@ func MakeParameters() {
 	maybeRegex := OptionalParam("-regex", regex)
 	maybeInclude := OptionalParam("-include", include)
 	maybeShorten := OptionalParam("-shortener", shortenerURL) + OptionalParam("-token", shortenerToken)
-	fullCommand := cron + " " + executablePath + "/nyaaNotify" + " -name='" + name + "' -webhook='" + webhook + "' -amount='" + amount + "'" + maybeInclude + maybeRegex + maybeShorten
+	fullCommand := cron + " " + ExecutablePath + "/nyaaNotify" + " -name='" + name + "' -webhook='" + webhook + "' -amount='" + amount + "'" + maybeInclude + maybeRegex + maybeShorten
 	println(fullCommand)
 }

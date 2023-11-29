@@ -16,8 +16,8 @@ func MatchTitle(title string, includeString string, regex string) bool {
 		return match
 	}
 	lookForWords := strings.Split(includeString, ",")
+	title = strings.ToLower(title)
 	for _, word := range lookForWords {
-		title = strings.ToLower(title)
 		word = strings.ToLower(word)
 		if strings.HasPrefix(word, ";") {
 			if strings.Contains(title, word[1:]) {
@@ -41,8 +41,4 @@ func OptionalParam(flag, value string) string {
 
 func GetDate() string {
 	return time.Now().Format("2006-01-02")
-}
-
-func GetCleanDateString() string {
-	return time.Now().AddDate(0, 0, 7).Format("2006-01-02")
 }

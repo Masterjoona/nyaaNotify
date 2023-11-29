@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-var postedFile string
-var logFile string
-var executablePath string
+var PostedFile string
+var LogFile string
+var ExecutablePath string
 
 func getExecutablePath() string {
 	ex, err := os.Executable()
@@ -21,18 +21,18 @@ func getExecutablePath() string {
 }
 
 func CleanFiles() {
-	err := os.Remove(postedFile)
+	err := os.Remove(PostedFile)
 	if err != nil {
 		Logger("No file to clean.")
 	}
-	err = os.Remove(logFile)
+	err = os.Remove(LogFile)
 	if err != nil {
 		Logger("No file to clean.")
 	}
 }
 
 func Logger(message string) {
-	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
 	}

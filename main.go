@@ -15,7 +15,7 @@ type NyaaPost struct {
 	CategoryImg string
 }
 
-var url = "https://nyaa.si"
+var Url = "https://nyaa.si"
 
 func main() {
 	generateCron, discordWebhook, includeString, regexString, amount := ParseCommandParameters()
@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 	today := GetDate()
-	if GetField("CleanDate") == today || (GetField("LastMod") != today && GetField("LastMod") != "") {
+	if GetField("LastMod") != today && GetField("LastMod") != "" {
 		Logger("Seems like a week has passed, cleaning JSON and log file.")
 		CleanFiles()
 	}
@@ -33,7 +33,6 @@ func main() {
 	if IsAmount(amount) {
 		Logger("Posted already enough today.")
 		SetField("LastMod", today)
-		SetField("CleanDate", GetCleanDateString())
 		return
 	}
 
@@ -44,9 +43,9 @@ func main() {
 		}
 		nyaaPosts[i] = NyaaPost{
 			Category:    match[1],
-			URL:         url + match[3],
+			URL:         Url + match[3],
 			Title:       match[4],
-			Torrent:     url + match[8],
+			Torrent:     Url + match[8],
 			Magnet:      match[9],
 			Size:        match[10],
 			Date:        match[11],
@@ -54,7 +53,7 @@ func main() {
 			Leech:       match[13],
 			Completed:   match[14],
 			Comments:    match[5],
-			CategoryImg: url + match[2],
+			CategoryImg: Url + match[2],
 		}
 	}
 
@@ -62,8 +61,8 @@ func main() {
 		title := post.Title
 		if MatchTitle(title, includeString, regexString) {
 			Logger("Found match: " + title)
-			url := post.URL
-			if AlreadyPosted(url) {
+			postURL := post.URL
+			if AlreadyPosted(postURL) {
 				Logger("Already posted: " + title)
 				continue
 			}
@@ -73,7 +72,7 @@ func main() {
 				return
 			}
 			SendEmbed(post, discordWebhook)
-			SetField("PostedURLs", url)
+			SetField("PostedURLs", postURL)
 		}
 	}
 }

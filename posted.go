@@ -10,7 +10,6 @@ import (
 type postedJSON struct {
 	PostedURLs []string `json:"postedURLs"`
 	LastMod    string   `json:"lastMod"`
-	CleanDate  string   `json:"cleanDate"`
 }
 
 func AlreadyPosted(checkURL string) bool {
@@ -42,68 +41,70 @@ func IsAmount(amount string) bool {
 	return len(postedURLs) >= amountInt
 }
 
-func GetField(field string) string {
-	f, err := os.Open(postedFile)
+func openAndDecodeFile() (postedJSON, *os.File, error) {
+	f, err := os.Open(PostedFile)
 	if err != nil {
-		return ""
+		return postedJSON{}, nil, err
 	}
 	defer f.Close()
 
-	postedJSON := postedJSON{}
-	err = json.NewDecoder(f).Decode(&postedJSON)
+	postedJSONData := postedJSON{}
+	err = json.NewDecoder(f).Decode(&postedJSONData)
+	if err != nil {
+		return postedJSON{}, nil, err
+	}
+
+	return postedJSONData, f, nil
+}
+
+func GetField(field string) string {
+	postedJSONData, _, err := openAndDecodeFile()
 	if err != nil {
 		return ""
 	}
 
 	switch field {
-	case "CleanDate":
-		return postedJSON.CleanDate
 	case "LastMod":
-		return postedJSON.LastMod
+		return postedJSONData.LastMod
 	case "PostedURLs":
-		return strings.Join(postedJSON.PostedURLs, ",")
+		return strings.Join(postedJSONData.PostedURLs, ",")
 	default:
 		return ""
 	}
 }
 
 func SetField(field string, value string) {
-	f, err := os.Open(postedFile)
+	postedJSONData, f, err := openAndDecodeFile()
 	if err != nil {
-		Logger("Error opening file: " + err.Error())
-		f, err = os.Create(postedFile)
+		Logger("Error opening/decoding file: " + err.Error())
+		f, err = os.Create(PostedFile)
 		if err != nil {
 			Logger("Error creating file: " + err.Error())
 			panic(err)
 		}
-	}
-	defer f.Close()
 
-	postedJSONUpdate := postedJSON{}
-	err = json.NewDecoder(f).Decode(&postedJSONUpdate)
-	if err != nil {
-		postedJSONUpdate = postedJSON{
+		postedJSONData = postedJSON{
 			PostedURLs: []string{},
 			LastMod:    "",
-			CleanDate:  "",
 		}
 	}
+
+	defer f.Close()
+
 	switch field {
-	case "CleanDate":
-		postedJSONUpdate.CleanDate = value
 	case "LastMod":
-		postedJSONUpdate.LastMod = value
+		postedJSONData.LastMod = value
 	case "PostedURLs":
-		postedJSONUpdate.PostedURLs = append(postedJSONUpdate.PostedURLs, value)
+		postedJSONData.PostedURLs = append(postedJSONData.PostedURLs, value)
 	default:
 		return
 	}
 
-	updatedData, err := json.MarshalIndent(postedJSONUpdate, "", "    ")
+	updatedData, err := json.MarshalIndent(postedJSONData, "", "    ")
 	if err != nil {
 		Logger("Error marshalling JSON: " + err.Error())
 	}
-	err = os.WriteFile(postedFile, updatedData, 0644)
+	err = os.WriteFile(PostedFile, updatedData, 0644)
 	if err != nil {
 		Logger("Error writing file: " + err.Error())
 	}

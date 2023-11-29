@@ -3,7 +3,7 @@ package main
 import "regexp"
 
 func MatchPosts() ([][]string, []NyaaPost) {
-	re := regexp.MustCompile(`(?m)<tr class=".{1,10}">
+	postRe := regexp.MustCompile(`(?m)<tr class=".{1,10}">
 				<td>
 					<a href=".{1,10}" title="(.*?)">
 						<img src="(\/static\/img\/icons\/nyaa\/.{1,10})" alt=".*?" class="category-icon">
@@ -25,8 +25,8 @@ func MatchPosts() ([][]string, []NyaaPost) {
 				<td class="text-center">(\d*)<\/td>
 				<td class="text-center">(\d*)<\/td>
 			<\/tr>`)
-	content := FetchNyaa(url)
-	matches := re.FindAllStringSubmatch(string(content), -1)
+	content := FetchNyaa(Url)
+	matches := postRe.FindAllStringSubmatch(string(content), -1)
 	nyaaPosts := make([]NyaaPost, len(matches))
 	return matches, nyaaPosts
 }

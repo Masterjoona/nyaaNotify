@@ -24,7 +24,10 @@ func main() {
 		MakeParameters()
 		return
 	}
+
 	today := GetDate()
+	SetField("LastMod", today)
+
 	if GetField("LastMod") != today && GetField("LastMod") != "" {
 		Logger("Seems like a week has passed, cleaning JSON and log file.")
 		CleanFiles()
@@ -56,7 +59,6 @@ func main() {
 
 			if IsAmount(amount) {
 				Logger("Posted already enough today.")
-				SetField("LastMod", today)
 				return
 			}
 

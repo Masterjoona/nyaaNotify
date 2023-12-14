@@ -26,7 +26,6 @@ func main() {
 	}
 
 	today := GetDate()
-	SetField("LastMod", today)
 
 	if GetField("LastMod") != today && GetField("LastMod") != "" {
 		Logger("Seems like a week has passed, cleaning JSON and log file.")
@@ -64,6 +63,7 @@ func main() {
 
 			SendEmbed(nyaaPosts[i], discordWebhook)
 			SetField("PostedURLs", postURL)
+			SetField("LastMod", today)
 		}
 	}
 }

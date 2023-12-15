@@ -47,8 +47,12 @@ func CreateNyaaPost(matches []string) NyaaPost {
 	nyaaPost := NyaaPost{}
 	nyaaPost.Category = matches[1]
 	nyaaPost.CategoryImg = Url + matches[2]
-	nyaaPost.URL = Url + matches[3]
-	nyaaPost.Title = matches[4]
+	if nyaaPost.URL = Url + matches[3]; nyaaPost.URL == Url {
+		nyaaPost.URL = Url + matches[6]
+	}
+	if nyaaPost.Title = matches[4]; nyaaPost.Title == "" {
+		nyaaPost.Title = matches[7]
+	}
 	nyaaPost.Comments = matches[5]
 	nyaaPost.Torrent = Url + matches[8]
 	nyaaPost.Magnet = matches[9]

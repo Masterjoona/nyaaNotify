@@ -10,6 +10,7 @@ import (
 )
 
 var Name string
+var TestMatchTitle string
 var ShortenerToken string
 var ShortenerURL string
 
@@ -23,6 +24,7 @@ func ParseCommandParameters() (generateCron bool, discordWebhook, includeString,
 	flag.StringVar(&regexString, "regex", "", "regex to match.")
 	flag.StringVar(&amount, "amount", "", "stop posting after x links have been posted.")
 	flag.StringVar(&Name, "name", "", "name for logging and posted.txt")
+	flag.StringVar(&TestMatchTitle, "testTitle", "", "title to test the matching on. for multiple titles, separate with ;")
 	flag.Parse()
 
 	var executablePathLocal = getExecutablePath()
@@ -63,7 +65,7 @@ func MakeParameters() {
 	hour := time.Now().Hour()
 	defaultCron := "# Run every 10 minutes between " + fmt.Sprintf("%d:00", hour) + " and " + fmt.Sprintf("%d:00", hour+1) + " on " + weekday.String() + ".\n" + fmt.Sprintf("cron=*/10 %d-%d * * %d", hour, hour+1, weekday)
 	defaultAmount := "# Stop posting after x links have been posted.\namount=1"
-	defaultInclude := "\n# Look for banana, apple while ignoring orange. Case insensitive.\ninclude=banana,apple,;orange"
+	defaultInclude := "\n# Look for banana, apple or blueberry and while ignoring orange. Case insensitive.\ninclude=banana,(apple|blueberry),;orange"
 	defaultRegex := "# Look for case insenstive banana, apple or orange. Golang regex flavor.\n#regex=(?i)banana|apple|orange\n"
 	defaultWebhook := "webhook=https://discord.com/api/webhooks/123/abcdef\n"
 	defaultName := "# Name for logging and posted.txt\nname=" + weekday.String() + "_" + fmt.Sprintf("%d", hour)

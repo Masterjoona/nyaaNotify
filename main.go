@@ -25,6 +25,15 @@ func main() {
 		return
 	}
 
+	if TestMatchTitle != "" && (includeString != "" || regexString != "") {
+		TestMatches(includeString, regexString)
+		return
+	}
+
+	if discordWebhook == "" {
+		Logger("Running in no webhook mode. Only printing matches.")
+	}
+
 	today := GetDate()
 
 	if GetField("LastMod") != today && GetField("LastMod") != "" {
@@ -40,10 +49,6 @@ func main() {
 
 	allMatches, nyaaPosts := MatchPosts()
 	for i, matches := range allMatches {
-		if matches[5] == "" {
-			matches[5] = "0" // comments
-		}
-
 		nyaaPosts[i] = CreateNyaaPost(matches)
 		title := nyaaPosts[i].Title
 
@@ -61,9 +66,14 @@ func main() {
 				return
 			}
 
-			SendEmbed(nyaaPosts[i], discordWebhook)
 			SetField("PostedURLs", postURL)
 			SetField("LastMod", today)
+
+			if discordWebhook == "" {
+				continue
+			}
+
+			SendEmbed(nyaaPosts[i], discordWebhook)
 		}
 	}
 }

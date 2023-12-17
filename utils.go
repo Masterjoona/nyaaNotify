@@ -19,7 +19,19 @@ func MatchTitle(title string, includeString string, regex string) bool {
 	title = strings.ToLower(title)
 	for _, word := range lookForWords {
 		word = strings.ToLower(word)
-		if strings.HasPrefix(word, ";") {
+		if strings.HasPrefix(word, "(") && strings.HasSuffix(word, ")") {
+			found := false
+			options := strings.Split(word[1:len(word)-1], "|")
+			for _, option := range options {
+				if strings.Contains(title, option) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return false
+			}
+		} else if strings.HasPrefix(word, ";") {
 			if strings.Contains(title, word[1:]) {
 				return false
 			}
@@ -30,6 +42,22 @@ func MatchTitle(title string, includeString string, regex string) bool {
 		}
 	}
 	return true
+}
+
+func TestMatches(includeString, regexString string) {
+	Logger("Testing matches...")
+	var matchString string
+	if matchString = includeString; matchString == "" {
+		matchString = regexString
+	}
+	titles := strings.Split(TestMatchTitle, ";")
+	for _, title := range titles {
+		if MatchTitle(title, matchString, "") {
+			Logger("Matched: " + title)
+		} else {
+			Logger("Didn't match: " + title)
+		}
+	}
 }
 
 func OptionalParam(flag, value string) string {
@@ -53,7 +81,9 @@ func CreateNyaaPost(matches []string) NyaaPost {
 	if nyaaPost.Title = matches[4]; nyaaPost.Title == "" {
 		nyaaPost.Title = matches[7]
 	}
-	nyaaPost.Comments = matches[5]
+	if nyaaPost.Comments = matches[5]; nyaaPost.Comments == "" {
+		nyaaPost.Comments = "0"
+	}
 	nyaaPost.Torrent = Url + matches[8]
 	nyaaPost.Magnet = matches[9]
 	nyaaPost.Size = matches[10]

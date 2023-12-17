@@ -27,11 +27,12 @@ cd nyaaNotify && go build
 -   `-include` words that the title must include. `,` separate with commas and words starting with `;` are excluded (Intuitive, right?)
 -   `-regex` lets you set a regex that the title must match. Golang flavor.
 -   `-amount` how many torrents will be sent to discord.
-    > [!NOTE]  
-    > Either `-include` or `-regex` must be set. If both are set, regex will be checked first.
+
+> [!NOTE]  
+> Either `-include` or `-regex` must be set. If both are set, regex will be checked first.
 
 > [!TIP]
-> Use `-include` for keyword filtering (e.g., `-include="jujutsu,kaisen,1080,sub"`). Be mindful of multiple matches on an episode day, for that use `-amount` to limit the amount of torrents sent. You can do `(eng|[ani])` for example to match either `eng` or `ani` in the title.
+> Use `-include` for keyword filtering (e.g., `-include="jujutsu,kaisen,1080,sub"`). Be mindful of multiple matches on an episode day, for that use `-amount` to limit the amount of torrents sent. You can do `(eng|[ani])` for example to match either `eng` or `[ani]` in the title.
 
 ### Optional flags
 

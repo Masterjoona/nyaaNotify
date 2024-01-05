@@ -38,7 +38,6 @@ func main() {
 		postCategories := []string{nyaaPost.Category, nyaaPost.CategoryId}
 		if MatchPost(title, includeString, regexString, category, postCategories) {
 			Logger("Found match: " + title)
-			println(nyaaPost.Link)
 			postURL := nyaaPost.URL
 
 			if AlreadyPosted(postURL) {

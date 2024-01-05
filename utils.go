@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-func MatchTitle(title string, includeString string, regex string) bool {
+func MatchPost(title, includeString, regex, category string, postCategories []string) bool {
 	if regex != "" {
 		match, err := regexp.MatchString(regex, title)
 		if err != nil {
 			Logger("Error matching regex: " + err.Error())
 			panic(err)
 		}
-		return match
+		return match && matchCategory(postCategories, category)
 	}
 	lookForWords := strings.Split(includeString, ",")
 	title = strings.ToLower(title)
@@ -41,10 +41,10 @@ func MatchTitle(title string, includeString string, regex string) bool {
 			}
 		}
 	}
-	return true
+	return true && matchCategory(postCategories, category)
 }
 
-func TestMatches(includeString, regexString string) {
+func TestMatches(includeString, regexString, category string) {
 	Logger("Testing matches...")
 	var matchString string
 	if matchString = includeString; matchString == "" {
@@ -52,7 +52,7 @@ func TestMatches(includeString, regexString string) {
 	}
 	titles := strings.Split(TestMatchTitle, ";")
 	for _, title := range titles {
-		if MatchTitle(title, matchString, "") {
+		if MatchPost(title, matchString, "", category, []string{"", ""}) {
 			Logger("Matched: " + title)
 		} else {
 			Logger("Didn't match: " + title)
@@ -60,36 +60,20 @@ func TestMatches(includeString, regexString string) {
 	}
 }
 
-func OptionalParam(flag, value string) string {
+func matchCategory(postCategories []string, category string) bool {
+	if category == "" || postCategories[0] == category || postCategories[1] == category {
+		return true
+	}
+	return false
+}
+
+func ParamCreation(flag, value string) string {
 	if value != "" {
-		return " " + flag + "='" + value + "'"
+		return " -" + flag + "='" + value + "'"
 	}
 	return ""
 }
 
 func GetDate() string {
 	return time.Now().Format("2006-01-02")
-}
-
-func CreateNyaaPost(matches []string) NyaaPost {
-	nyaaPost := NyaaPost{}
-	nyaaPost.Category = matches[1]
-	nyaaPost.CategoryImg = Url + matches[2]
-	if nyaaPost.URL = Url + matches[3]; nyaaPost.URL == Url {
-		nyaaPost.URL = Url + matches[6]
-	}
-	if nyaaPost.Title = matches[4]; nyaaPost.Title == "" {
-		nyaaPost.Title = matches[7]
-	}
-	if nyaaPost.Comments = matches[5]; nyaaPost.Comments == "" {
-		nyaaPost.Comments = "0"
-	}
-	nyaaPost.Torrent = Url + matches[8]
-	nyaaPost.Magnet = matches[9]
-	nyaaPost.Size = matches[10]
-	nyaaPost.Date = matches[11]
-	nyaaPost.Seed = matches[12]
-	nyaaPost.Leech = matches[13]
-	nyaaPost.Completed = matches[14]
-	return nyaaPost
 }

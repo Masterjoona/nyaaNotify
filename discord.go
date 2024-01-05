@@ -2,28 +2,19 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gtuk/discordwebhook"
 )
 
-func makeDescription(post NyaaPost, shortenerToken string, shortenerURL string) string {
+func makeDescription(post NyaaPost) string {
 	comments := ""
 	if post.Comments != "0" {
 		comments = post.Comments + " comments"
 	}
-	if shortenerToken == "" || shortenerURL == "" {
-		torrent := "[Torrent](" + post.Torrent + ")"
-		return fmt.Sprintf("Size: %s | %s | <t:%s:R> | %s", post.Size, torrent, post.Date, comments)
-	}
-	shortURL, err := ShortenURL(post.Magnet, shortenerToken, shortenerURL)
-	if err != nil {
-		Logger("Error shortening url: " + err.Error())
-		return "[Torrent](" + post.Torrent + ") | Error shortening url."
-	}
-	magnet := "[Magnet](" + shortURL + ")"
-
-	return fmt.Sprintf("Size: %s | %s | <t:%s:R> | %s", post.Size, magnet, post.Date, comments)
-
+	torrent := "[Torrent](" + post.Link + ")"
+	timestamp, _ := time.Parse("Mon, 02 Jan 2006 15:04:05 -0700", post.PubDate)
+	return fmt.Sprintf("Size: %s | %s | <t:%d:R> | %s", post.Size, torrent, timestamp.Unix(), comments)
 }
 
 func SendEmbed(post NyaaPost, discordWebhook string) {
@@ -42,24 +33,25 @@ func SendEmbed(post NyaaPost, discordWebhook string) {
 		},
 		{
 			Name:   &seeds,
-			Value:  &post.Seed,
+			Value:  &post.Seeders,
 			Inline: &trueBool,
 		},
 		{
 			Name:   &leechs,
-			Value:  &post.Leech,
+			Value:  &post.Leechers,
 			Inline: &trueBool,
 		},
 		{
 			Name:   &completed,
-			Value:  &post.Completed,
+			Value:  &post.Downloads,
 			Inline: &trueBool,
 		},
 	}
+	categoryImgLink := Url + "/static/img/icons/nyaa/" + post.CategoryId + ".png"
 	thumb := discordwebhook.Thumbnail{
-		Url: &post.CategoryImg,
+		Url: &categoryImgLink,
 	}
-	description := makeDescription(post, ShortenerToken, ShortenerURL)
+	description := makeDescription(post)
 	embed := discordwebhook.Embed{
 		Title:       &post.Title,
 		Url:         &post.URL,

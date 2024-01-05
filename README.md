@@ -18,7 +18,7 @@ cd nyaaNotify && go build
 
 ### First time flags
 
--   `-generate` opens your `$EDITOR` and lets you set parameters
+-   `-generate` opens your `$EDITOR` and lets you set parameters. `-g` also works.
 
 ### Required flags
 
@@ -27,6 +27,7 @@ cd nyaaNotify && go build
 -   `-include` words that the title must include. `,` separate with commas and words starting with `;` are excluded (Intuitive, right?)
 -   `-regex` lets you set a regex that the title must match. Golang flavor.
 -   `-amount` how many torrents will be sent to discord.
+-   `-category` category to search for. For example `1_4` or the string `Anime - Raw`
 
 > [!NOTE]  
 > Either `-include` or `-regex` must be set. If both are set, regex will be checked first.
@@ -34,10 +35,11 @@ cd nyaaNotify && go build
 > [!TIP]
 > Use `-include` for keyword filtering (e.g., `-include="jujutsu,kaisen,1080,sub"`). Be mindful of multiple matches on an episode day, for that use `-amount` to limit the amount of torrents sent. You can do `(eng|[ani])` for example to match either `eng` or `[ani]` in the title.
 
+> [!TIP]
+> You can set variables in crontab `var=value` and reference them by `$var`. Doing this you can avoid long lines with the same webhook url or the filepath!
+
 ### Optional flags
 
--   `-shortener` input a url shortener. Because `[Magnet](magnet:?xt=urn:btih:...)` won't get markdowned in discord.
--   `-token` the token for the url shortener. If these are not set, it will link the .torrent file directly.
 -   `-testTitle` lets you test the regex and include flags. `title1;title2`
 
 ## Modules
@@ -57,3 +59,4 @@ _What `./nyaaNotify -generate` looks like_
 -   I can't guarantee it always works as intended but I tried to make it good enough.
 -   Beginner project, don't expect too much.
 -   I'm not responsible for anything you do with this program.
+-   Found [this](https://github.com/Zhousiru/NyaaHub) which is basically this but better.

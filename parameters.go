@@ -11,19 +11,17 @@ import (
 
 var Name string
 var TestMatchTitle string
-var ShortenerToken string
-var ShortenerURL string
 
-func ParseCommandParameters() (generateCron bool, discordWebhook, includeString, regexString, amount string) {
+func ParseCommandParameters() (generateCron bool, discordWebhook, includeString, regexString, amount, category string) {
 
 	flag.BoolVar(&generateCron, "generate", false, "generate a cron expression")
+	flag.BoolVar(&generateCron, "g", false, "generate a cron expression")
 	flag.StringVar(&discordWebhook, "webhook", "", "discord webhook url")
-	flag.StringVar(&ShortenerToken, "token", "", "see readme")
-	flag.StringVar(&ShortenerURL, "shortener", "", "see readme")
 	flag.StringVar(&includeString, "include", "", "strings to look for")
 	flag.StringVar(&regexString, "regex", "", "regex to match.")
 	flag.StringVar(&amount, "amount", "", "stop posting after x links have been posted.")
 	flag.StringVar(&Name, "name", "", "name for logging and posted.txt")
+	flag.StringVar(&category, "category", "", "category to look for.")
 	flag.StringVar(&TestMatchTitle, "testTitle", "", "title to test the matching on. for multiple titles, separate with ;")
 	flag.Parse()
 
@@ -32,21 +30,21 @@ func ParseCommandParameters() (generateCron bool, discordWebhook, includeString,
 	LogFile = executablePathLocal + "/" + Name + "_log.txt"
 	ExecutablePath = executablePathLocal
 
-	return generateCron, discordWebhook, includeString, regexString, amount
+	return generateCron, discordWebhook, includeString, regexString, amount, category
 }
 
-func parseParameters(parameters string) (cron, include, regex, webhook, nameName, apiUrl, token, amount string) {
+func parseParameters(parameters string) (cron, include, regex, webhook, nameName, amount, category, path string) {
 	lines := strings.Split(parameters, "\n")
 
 	prefixes := map[string]*string{
-		"cron=":      &cron,
-		"include=":   &include,
-		"regex=":     &regex,
-		"webhook=":   &webhook,
-		"name=":      &nameName,
-		"shortener=": &apiUrl,
-		"token=":     &token,
-		"amount=":    &amount,
+		"cron=":     &cron,
+		"include=":  &include,
+		"regex=":    &regex,
+		"webhook=":  &webhook,
+		"name=":     &nameName,
+		"amount=":   &amount,
+		"category=": &category,
+		"path=":     &path,
 	}
 
 	for _, line := range lines {
@@ -65,13 +63,13 @@ func MakeParameters() {
 	hour := time.Now().Hour()
 	defaultCron := "# Run every 10 minutes between " + fmt.Sprintf("%d:00", hour) + " and " + fmt.Sprintf("%d:00", hour+1) + " on " + weekday.String() + ".\n" + fmt.Sprintf("cron=*/10 %d-%d * * %d", hour, hour+1, weekday)
 	defaultAmount := "# Stop posting after x links have been posted.\namount=1"
-	defaultInclude := "\n# Look for banana, apple or blueberry and while ignoring orange. Case insensitive.\ninclude=banana,(apple|blueberry),;orange"
+	defaultInclude := "\n# Look for banana, apple or blueberry and while ignoring orange. Case insensitive.\n#include=banana,(apple|blueberry),;orange\n"
 	defaultRegex := "# Look for case insenstive banana, apple or orange. Golang regex flavor.\n#regex=(?i)banana|apple|orange\n"
-	defaultWebhook := "webhook=https://discord.com/api/webhooks/123/abcdef\n"
+	defaultWebhook := "webhook=discord\n"
 	defaultName := "# Name for logging and posted.txt\nname=" + weekday.String() + "_" + fmt.Sprintf("%d", hour)
-	defaultURLShortenAPI := "\n# Api url for shortening urls.\n#shortener="
-	defajltURLShortenToken := "# Token for shortening urls.\n#token="
-	defaultText := defaultCron + "\n" + defaultAmount + "\n" + defaultInclude + "\n" + defaultRegex + "\n" + defaultWebhook + "\n" + defaultName + "\n" + defaultURLShortenAPI + "\n" + defajltURLShortenToken
+	defaultCategory := "# Category to look for. Can either be number_number or the string equivalent.\n#category=1_2\n#category=Anime - English-translated"
+	defaultPath := "# Path to nyaaNotify executable. Mostly for having a variable in crontab.\n#path=./nyaaNotify\n"
+	defaultText := defaultCron + "\n" + defaultAmount + "\n" + defaultInclude + "\n" + defaultRegex + "\n" + defaultWebhook + "\n" + defaultName + "\n" + defaultCategory + "\n" + defaultPath
 	editor := editor.New([]byte(defaultText), "parameters.sh")
 	output, err := editor.Run()
 	if err != nil {
@@ -79,25 +77,23 @@ func MakeParameters() {
 		panic(err)
 	}
 
-	cron, include, regex, webhook, name, shortenerURL, shortenerToken, amount := parseParameters(string(output))
-	if cron == "" || webhook == "" || (include == "" && regex == "") || name == "" || ((shortenerURL == "" || shortenerToken == "") && (shortenerURL != "" || shortenerToken != "")) {
+	cron, include, regex, webhook, name, amount, category, path := parseParameters(string(output))
+	if cron == "" || webhook == "" || (include == "" && regex == "") || name == "" {
 		Logger("cron=" + cron)
 		Logger("include=" + include)
 		Logger("regex=" + regex)
 		Logger("webhook=" + webhook)
 		Logger("name=" + name)
 		Logger("amount=" + amount)
-		if (shortenerURL == "" && shortenerToken != "") || (shortenerURL != "" && shortenerToken == "") {
-			Logger("shortener=" + shortenerURL)
-			Logger("token=" + shortenerToken)
-		}
-		Logger("Invalid parameters")
-		panic("Invalid parameters")
+		Logger("category=" + category)
+		panic("Invalid parameters!")
 	}
 
-	maybeRegex := OptionalParam("-regex", regex)
-	maybeInclude := OptionalParam("-include", include)
-	maybeShorten := OptionalParam("-shortener", shortenerURL) + OptionalParam("-token", shortenerToken)
-	fullCommand := cron + " " + ExecutablePath + "/nyaaNotify" + " -name='" + name + "' -webhook='" + webhook + "' -amount='" + amount + "'" + maybeInclude + maybeRegex + maybeShorten
+	matching := ParamCreation("regex", regex) + ParamCreation("include", include)
+	base := cron + " " + ExecutablePath + "/nyaaNotify"
+	if path != "" {
+		base = cron + " " + path
+	}
+	fullCommand := base + ParamCreation("name", name) + ParamCreation("webhook", webhook) + ParamCreation("amount", amount) + matching + ParamCreation("category", category)
 	println(fullCommand)
 }

@@ -1,24 +1,9 @@
 package main
 
-type NyaaPost struct {
-	Category    string
-	Title       string
-	Magnet      string
-	Torrent     string
-	URL         string
-	Size        string
-	Date        string
-	Seed        string
-	Leech       string
-	Completed   string
-	Comments    string
-	CategoryImg string
-}
-
 var Url = "https://nyaa.si"
 
 func main() {
-	generateCron, discordWebhook, includeString, regexString, amount := ParseCommandParameters()
+	generateCron, discordWebhook, includeString, regexString, amount, category := ParseCommandParameters()
 
 	if generateCron {
 		MakeParameters()
@@ -26,7 +11,7 @@ func main() {
 	}
 
 	if TestMatchTitle != "" && (includeString != "" || regexString != "") {
-		TestMatches(includeString, regexString)
+		TestMatches(includeString, regexString, category)
 		return
 	}
 
@@ -37,7 +22,7 @@ func main() {
 	today := GetDate()
 
 	if GetField("LastMod") != today && GetField("LastMod") != "" {
-		Logger("Seems like a week has passed, cleaning JSON and log file.")
+		Logger("Seems like some time has passed, cleaning JSON and log file.")
 		CleanFiles()
 	}
 
@@ -47,14 +32,14 @@ func main() {
 		return
 	}
 
-	allMatches, nyaaPosts := MatchPosts()
-	for i, matches := range allMatches {
-		nyaaPosts[i] = CreateNyaaPost(matches)
-		title := nyaaPosts[i].Title
-
-		if MatchTitle(title, includeString, regexString) {
+	nyaaPosts := GetNyaaPosts()
+	for _, nyaaPost := range nyaaPosts {
+		title := nyaaPost.Title
+		postCategories := []string{nyaaPost.Category, nyaaPost.CategoryId}
+		if MatchPost(title, includeString, regexString, category, postCategories) {
 			Logger("Found match: " + title)
-			postURL := nyaaPosts[i].URL
+			println(nyaaPost.Link)
+			postURL := nyaaPost.URL
 
 			if AlreadyPosted(postURL) {
 				Logger("Already posted: " + title)
@@ -73,7 +58,7 @@ func main() {
 				continue
 			}
 
-			SendEmbed(nyaaPosts[i], discordWebhook)
+			SendEmbed(nyaaPost, discordWebhook)
 		}
 	}
 }

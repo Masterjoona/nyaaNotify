@@ -34,8 +34,8 @@ func IsAmount(amount string) bool {
 	postedURLs := strings.Split(postedURLsString, ",")
 	amountInt, err := strconv.Atoi(amount)
 	if err != nil {
-		Logger("Error converting amount to int: " + err.Error())
-		panic(err)
+		Logger("Error converting amount to int: " + err.Error() + "\nAmount not specified?")
+		return false
 	}
 
 	return len(postedURLs) >= amountInt

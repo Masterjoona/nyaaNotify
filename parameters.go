@@ -12,7 +12,7 @@ import (
 var Name string
 var TestMatchTitle string
 
-func ParseCommandParameters() (generateCron bool, discordWebhook, includeString, regexString, amount, category string) {
+func ParseCommandParameters() (generateCron bool, discordWebhook, includeString, regexString, amount, category, remake, trusted string) {
 
 	flag.BoolVar(&generateCron, "generate", false, "generate a cron expression")
 	flag.BoolVar(&generateCron, "g", false, "generate a cron expression")
@@ -22,6 +22,8 @@ func ParseCommandParameters() (generateCron bool, discordWebhook, includeString,
 	flag.StringVar(&amount, "amount", "", "stop posting after x links have been posted.")
 	flag.StringVar(&Name, "name", "", "name for logging and posted.txt")
 	flag.StringVar(&category, "category", "", "category to look for.")
+	flag.StringVar(&remake, "remake", "", "is post a remake")
+	flag.StringVar(&trusted, "trusted", "", "is post by a trusted user")
 	flag.StringVar(&TestMatchTitle, "testTitle", "", "title to test the matching on. for multiple titles, separate with ;")
 	flag.Parse()
 
@@ -30,10 +32,10 @@ func ParseCommandParameters() (generateCron bool, discordWebhook, includeString,
 	LogFile = executablePathLocal + "/" + Name + "_log.txt"
 	ExecutablePath = executablePathLocal
 
-	return generateCron, discordWebhook, includeString, regexString, amount, category
+	return
 }
 
-func parseParameters(parameters string) (cron, include, regex, webhook, nameName, amount, category, path string) {
+func parseParameters(parameters string) (cron, include, regex, webhook, nameName, amount, category, remake, trusted, path string) {
 	lines := strings.Split(parameters, "\n")
 
 	prefixes := map[string]*string{
@@ -44,6 +46,8 @@ func parseParameters(parameters string) (cron, include, regex, webhook, nameName
 		"name=":     &nameName,
 		"amount=":   &amount,
 		"category=": &category,
+		"remake=":   &remake,
+		"trusted=":  &trusted,
 		"path=":     &path,
 	}
 
@@ -68,8 +72,9 @@ func MakeParameters() {
 	defaultWebhook := "webhook=discord\n"
 	defaultName := "# Name for logging and posted.txt\nname=" + weekday.String() + "_" + fmt.Sprintf("%d", hour)
 	defaultCategory := "# Category to look for. Can either be number_number or the string equivalent.\n#category=1_2\n#category=Anime - English-translated"
+	defaultAttributes := "# Attributes to look for.\n#remake=false\n#trusted=false"
 	defaultPath := "# Path to nyaaNotify executable. Mostly for having a variable in crontab.\n#path=./nyaaNotify\n"
-	defaultText := defaultCron + "\n" + defaultAmount + "\n" + defaultInclude + "\n" + defaultRegex + "\n" + defaultWebhook + "\n" + defaultName + "\n" + defaultCategory + "\n" + defaultPath
+	defaultText := defaultCron + "\n" + defaultAmount + "\n" + defaultInclude + "\n" + defaultRegex + "\n" + defaultWebhook + "\n" + defaultName + "\n" + defaultCategory + "\n" + defaultAttributes + "\n" + defaultPath
 	editor := editor.New([]byte(defaultText), "parameters.sh")
 	output, err := editor.Run()
 	if err != nil {
@@ -77,7 +82,7 @@ func MakeParameters() {
 		panic(err)
 	}
 
-	cron, include, regex, webhook, name, amount, category, path := parseParameters(string(output))
+	cron, include, regex, webhook, name, amount, category, remake, trusted, path := parseParameters(string(output))
 	if cron == "" || webhook == "" || (include == "" && regex == "") || name == "" {
 		Logger("cron=" + cron)
 		Logger("include=" + include)
@@ -86,6 +91,8 @@ func MakeParameters() {
 		Logger("name=" + name)
 		Logger("amount=" + amount)
 		Logger("category=" + category)
+		Logger("remake=" + remake)
+		Logger("trusted=" + trusted)
 		panic("Invalid parameters!")
 	}
 

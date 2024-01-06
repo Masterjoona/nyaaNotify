@@ -20,27 +20,33 @@ cd nyaaNotify && go build
 
 -   `-generate` opens your `$EDITOR` and lets you set parameters. `-g` also works.
 
-### Required flags
+### Required* flags
 
 -   `-webhook` webhook url
 -   `-name` Name for logging and posted files
 -   `-include` words that the title must include. `,` separate with commas and words starting with `;` are excluded (Intuitive, right?)
 -   `-regex` lets you set a regex that the title must match. Golang flavor.
 -   `-amount` how many torrents will be sent to discord.
--   `-category` category to search for. For example `1_4` or the string `Anime - Raw`
+
+_*Even though I said they are required, the program will run without them._
 
 > [!NOTE]  
 > Either `-include` or `-regex` must be set. If both are set, regex will be checked first.
 
 > [!TIP]
-> Use `-include` for keyword filtering (e.g., `-include="jujutsu,kaisen,1080,sub"`). Be mindful of multiple matches on an episode day, for that use `-amount` to limit the amount of torrents sent. You can do `(eng|[ani])` for example to match either `eng` or `[ani]` in the title.
+> Use `-include` for keyword filtering (e.g., `-include="jujutsu,kaisen,1080,sub"`). Be mindful of multiple matches on an episode day, for that use `-amount` to limit the amount of torrents sent. You can do `(eng|[ani]|amzn)` for example to match either `eng`, `[ani]` or `amzn` in the title.
 
 > [!TIP]
 > You can set variables in crontab `var=value` and reference them by `$var`. Doing this you can avoid long lines with the same webhook url or the filepath!
 
 ### Optional flags
 
+-   `-category` category to search for. For example `1_4` or the string `Anime - Raw`
+-   `-remake` should the post have the remake attribute `true` or `false`
+-   `-trusted` should the post have been added by a trusted user `true` or `false`
 -   `-testTitle` lets you test the regex and include flags. `title1;title2`
+
+
 
 ## Modules
 

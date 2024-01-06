@@ -3,7 +3,7 @@ package main
 var Url = "https://nyaa.si"
 
 func main() {
-	generateCron, discordWebhook, includeString, regexString, amount, category := ParseCommandParameters()
+	generateCron, discordWebhook, includeString, regexString, amount, category, remake, trusted := ParseCommandParameters()
 
 	if generateCron {
 		MakeParameters()
@@ -35,8 +35,9 @@ func main() {
 	nyaaPosts := GetNyaaPosts()
 	for _, nyaaPost := range nyaaPosts {
 		title := nyaaPost.Title
-		postCategories := []string{nyaaPost.Category, nyaaPost.CategoryId}
-		if MatchPost(title, includeString, regexString, category, postCategories) {
+		categories := []string{category, nyaaPost.Category, nyaaPost.CategoryId}
+		attributes := [][]string{{remake, trusted}, {nyaaPost.Remake, nyaaPost.Trusted}}
+		if MatchPost(title, includeString, regexString, categories, attributes) {
 			Logger("Found match: " + title)
 			postURL := nyaaPost.URL
 
